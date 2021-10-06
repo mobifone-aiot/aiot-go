@@ -4,7 +4,10 @@ type Client struct {
 	addr string
 }
 
-// Contructor
 func New(addr string) Client {
 	return Client{addr: addr}
+}
+
+func (c Client) Login() error {
+	return nil
 }
