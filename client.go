@@ -12,10 +12,12 @@ type Client struct {
 	addr string
 }
 
+// Tạo mới một đối tượng aiot Client
 func New(addr string) Client {
 	return Client{addr: addr}
 }
 
+// Tạo một user mới bằng email và password
 func (c Client) CreateUser(email, password string) error {
 	body, err := json.Marshal(map[string]string{
 		"email":    email,
@@ -54,6 +56,7 @@ func (c Client) CreateUser(email, password string) error {
 	return fmt.Errorf("status code not 201: %s", msg)
 }
 
+// Tạo mới một token bằng username và password
 func (c *Client) Token(email, password string) (string, error) {
 	reqBody, err := json.Marshal(map[string]string{
 		"email":    email,
@@ -106,6 +109,7 @@ func (c *Client) Token(email, password string) (string, error) {
 	return tokenString, nil
 }
 
+// Tạo mới nhiều things
 func (c Client) CreateThings(token string, names []string) ([]Thing, error) {
 	var body []map[string]string
 	for _, name := range names {
