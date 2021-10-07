@@ -13,7 +13,7 @@ type Client struct {
 }
 
 // Tạo mới một đối tượng aiot Client
-func New(addr string) Client {
+func NewClient(addr string) Client {
 	return Client{addr: addr}
 }
 
