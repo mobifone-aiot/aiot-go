@@ -109,7 +109,7 @@ func (c *Client) Token(email, password string) (string, error) {
 	return tokenString, nil
 }
 
-// Tạo mới nhiều things
+// Tạo mới nhiều vật mới
 func (c Client) CreateThings(token string, names []string) ([]Thing, error) {
 	var body []map[string]string
 	for _, name := range names {
@@ -163,6 +163,7 @@ func (c Client) CreateThings(token string, names []string) ([]Thing, error) {
 	return respBody.Things, nil
 }
 
+// Lấy thông tin nhiều vật
 func (c Client) GetThings(token string, limit, offset int) ([]Thing, int, error) {
 	req, err := http.NewRequest(
 		http.MethodGet,
@@ -205,6 +206,7 @@ func (c Client) GetThings(token string, limit, offset int) ([]Thing, int, error)
 	return respBody.Things, respBody.Total, nil
 }
 
+// Tạo mới nhiều kênh
 func (c Client) CreateChannels(token string, names []string) ([]Channel, error) {
 	var body []map[string]string
 	for _, name := range names {
@@ -257,6 +259,7 @@ func (c Client) CreateChannels(token string, names []string) ([]Channel, error) 
 	return respBody.Channels, nil
 }
 
+// Lấy thông tin nhiều kênh
 func (c Client) GetChannels(token string, limit, offset int) ([]Channel, int, error) {
 	req, err := http.NewRequest(
 		http.MethodGet,
@@ -299,6 +302,7 @@ func (c Client) GetChannels(token string, limit, offset int) ([]Channel, int, er
 	return respBody.Channels, respBody.Total, nil
 }
 
+// Kết nối nhiều vật với nhiều kênh
 func (c Client) Connect(token string, thingIDs, chanIDs []string) error {
 	if len(thingIDs) != len(chanIDs) {
 		return fmt.Errorf("number of things not equal the number of channels")
@@ -345,6 +349,7 @@ func (c Client) Connect(token string, thingIDs, chanIDs []string) error {
 	return nil
 }
 
+// Xóa vật trên hệ thống
 func (c Client) DeleteThing(token string, thingID string) error {
 	req, err := http.NewRequest(
 		http.MethodDelete,
