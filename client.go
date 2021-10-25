@@ -1,7 +1,6 @@
 package aiot
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -101,56 +100,49 @@ func (c Client) UserProfile(token string) (UserProfile, error) {
 		return UserProfile{}, makeE(op, err)
 	}
 
-	var ret UserProfile
-	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+	var body struct {
+		Email        string `json:"email"`
+		Password     string `json:"password"`
+		Fullname     string `json:"fullName"`
+		Phonenumber  string `json:"phoneNumber"`
+		Description  string `json:"desc"`
+		CustomerId   int64  `json:"customerId"`
+		UserTypeId   int64  `json:"userTypeId"`
+		UserStatusId int64  `json:"userStatusId"`
+		UserGroupId  int64  `json:"userGroupId"`
+		CreatedBy    string `json:"createdBy"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
 		return UserProfile{}, makeE(op, err)
 	}
 
-	return ret, nil
+	return UserProfile{
+		Email:        body.Email,
+		Password:     body.Email,
+		Fullname:     body.Fullname,
+		Phonenumber:  body.Phonenumber,
+		Description:  body.Description,
+		CustomerId:   body.CustomerId,
+		UserTypeId:   body.UserTypeId,
+		UserStatusId: body.UserStatusId,
+		UserGroupId:  body.UserGroupId,
+		CreatedBy:    body.CreatedBy,
+	}, nil
 }
 
-func (c Client) httpDo(r request) (*http.Response, error) {
-	const op operation = "aiot.httpDo"
+// func (c Client) ListThingsByUser(token string) ([]Thing, int, error) {
+// 	return nil, 0, nil
+// }
 
-	body, err := json.Marshal(r.Body)
-	if err != nil {
-		return nil, makeE(op, err)
-	}
+// // Tạo một gateway mới
+// func (c Client) CreateGateway(token, in CreateGatewayInput) error {
+// 	const op operation = "aiot.CreateGateway"
 
-	req, err := http.NewRequest(r.Method, c.makeUrl(r.Path), bytes.NewBuffer(body))
-	if err != nil {
-		return nil, makeE(op, err)
-	}
+// 	return makeE(op, fmt.Errorf("okok"))
+// }
 
-	req.Header.Set("Content-Type", "application/json")
+// // Liệt kê các gateways
+// func (c Client) ListGateways(token string) {
 
-	if r.Token != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", r.Token))
-	}
-
-	client := http.Client{}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, makeE(op, err)
-	}
-
-	if resp.StatusCode != 200 {
-		var e struct {
-			ErrorCode    string `json:"errorCode"`
-			ErrorMessage string `json:"errorMessage"`
-		}
-
-		if err := json.NewDecoder(resp.Body).Decode(&e); err != nil {
-			return nil, makeE(op, err)
-		}
-
-		return nil, makeE(op, fmt.Errorf("[code] %s [message] %s", e.ErrorCode, e.ErrorMessage))
-	}
-
-	return resp, nil
-}
-
-func (c Client) makeUrl(path string) string {
-	return c.gatewayAddr + path
-}
+// }
