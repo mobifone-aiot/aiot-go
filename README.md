@@ -44,6 +44,37 @@ func main() {
 
 ```
 
+
+### Xác thực token
+```go
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/mobifone-aiot/aiot-go"
+)
+
+func main() {
+	
+	client := aiot.NewClient("http://localhost")
+
+	token, err := client.Token("email@demo.com", "password")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	ok, err := client.TokenVerify(token)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Printf("Token valid: %v", ok)
+}
+
+```
+
 ### Reset password
 ```go
 package main
