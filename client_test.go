@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	gatewayAddr     = ""
-	validEmail      = ""
-	validPassword   = ""
-	invalidPassword = ""
+	gatewayAddr     = "http://10.16.150.132"
+	validEmail      = "testsdk@mobifone.vn"
+	validPassword   = "12345678"
+	invalidPassword = "sda21j3h123"
 )
 
 func Test_Token_Success(t *testing.T) {
