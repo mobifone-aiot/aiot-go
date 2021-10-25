@@ -11,16 +11,16 @@ var (
 	ErrInvalidEmailOrPassword      = errors.New("invalid email or password")
 )
 
-type Op string
-type Kind uint8
+type operation string
+type kind uint8
 
-type Error struct {
-	Op   Op
+type aiotError struct {
+	Op   operation
 	Err  error
-	Kind Kind
+	Kind kind
 }
 
-func (e *Error) Error() string {
+func (e *aiotError) Error() string {
 	var buf bytes.Buffer
 
 	// Print the current operation in our stack, if any.
@@ -36,32 +36,19 @@ func (e *Error) Error() string {
 	return buf.String()
 }
 
-func E(args ...interface{}) error {
-	e := &Error{}
+func makeE(args ...interface{}) error {
+	e := &aiotError{}
 	for _, arg := range args {
 		switch arg := arg.(type) {
-		case Op:
+		case operation:
 			e.Op = arg
 		case error:
 			e.Err = arg
-		case Kind:
+		case kind:
 			e.Kind = arg
 		default:
 			panic("bad call to E")
 		}
 	}
 	return e
-}
-
-func Is(kind Kind, err error) bool {
-	e, ok := err.(*Error)
-	if !ok {
-		return false
-	}
-
-	if e.Kind != 0 {
-		return e.Kind == kind
-	}
-
-	return Is(kind, e.Err)
 }

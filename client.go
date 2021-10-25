@@ -19,7 +19,7 @@ func NewClient(gatewayAddr string) Client {
 
 // Tạo mới một token bằng username và password
 func (c Client) Token(email, password string) (string, error) {
-	const op Op = "aiot.Token"
+	const op operation = "aiot.Token"
 
 	resp, err := c.httpDo(request{
 		Path:   "/api-gw/v1/user/login",
@@ -30,7 +30,7 @@ func (c Client) Token(email, password string) (string, error) {
 		},
 	})
 	if err != nil {
-		return "", E(op, err)
+		return "", makeE(op, err)
 	}
 
 	var body struct {
@@ -38,12 +38,12 @@ func (c Client) Token(email, password string) (string, error) {
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
-		return "", E(op, err)
+		return "", makeE(op, err)
 	}
 
 	fields := strings.Fields(body.Token)
 	if len(fields) != 2 {
-		return "", E(op, fmt.Errorf("invalid token: %s", body.Token))
+		return "", makeE(op, fmt.Errorf("invalid token: %s", body.Token))
 	}
 
 	return fields[1], nil
@@ -51,7 +51,7 @@ func (c Client) Token(email, password string) (string, error) {
 
 // Kiểm tra tính hợp lệ của token
 func (c Client) TokenVerify(token string) (bool, error) {
-	const op Op = "aiot.TokenVerify"
+	const op operation = "aiot.TokenVerify"
 
 	_, err := c.httpDo(request{
 		Path:   "/api-gw/v1/user/verify",
@@ -60,7 +60,7 @@ func (c Client) TokenVerify(token string) (bool, error) {
 	})
 
 	if err != nil {
-		return false, E(op, err)
+		return false, makeE(op, err)
 	}
 
 	return true, nil
@@ -68,7 +68,7 @@ func (c Client) TokenVerify(token string) (bool, error) {
 
 // Thay đổi password
 func (c Client) ResetPassword(token, newPW, oldPW string) error {
-	const op Op = "aiot.ResetPassword"
+	const op operation = "aiot.ResetPassword"
 
 	_, err := c.httpDo(request{
 		Path:   "/api-gw/v1/user/reset-password",
@@ -81,7 +81,7 @@ func (c Client) ResetPassword(token, newPW, oldPW string) error {
 	})
 
 	if err != nil {
-		return E(op, err)
+		return makeE(op, err)
 	}
 
 	return nil
@@ -89,7 +89,7 @@ func (c Client) ResetPassword(token, newPW, oldPW string) error {
 
 // Lấy thông tin profile của người dùng
 func (c Client) UserProfile(token string) (UserProfile, error) {
-	const op Op = "aiot.UserProfile"
+	const op operation = "aiot.UserProfile"
 
 	resp, err := c.httpDo(request{
 		Path:   "/api-gw/v1/user/profile",
@@ -98,52 +98,28 @@ func (c Client) UserProfile(token string) (UserProfile, error) {
 	})
 
 	if err != nil {
-		return UserProfile{}, E(op, err)
+		return UserProfile{}, makeE(op, err)
 	}
 
 	var ret UserProfile
 	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
-		return UserProfile{}, E(op, err)
+		return UserProfile{}, makeE(op, err)
 	}
 
 	return ret, nil
 }
 
-// Tạo mới nhiều vật mới
-// func (c Client) CreateThings(token string, names []string) ([]Thing, error) {
-// }
-
-// // Lấy thông tin nhiều vật
-// func (c Client) GetThings(token string, limit, offset int) ([]Thing, int, error) {
-// }
-
-// // Tạo mới nhiều kênh
-// func (c Client) CreateChannels(token string, names []string) ([]Channel, error) {
-// }
-
-// // Lấy thông tin nhiều kênh
-// func (c Client) GetChannels(token string, limit, offset int) ([]Channel, int, error) {
-// }
-
-// // Kết nối nhiều vật với nhiều kênh
-// func (c Client) Connect(token string, thingIDs, chanIDs []string) error {
-// }
-
-// // Xóa vật trên hệ thống
-// func (c Client) DeleteThing(token string, thingID string) error {
-// }
-
 func (c Client) httpDo(r request) (*http.Response, error) {
-	const op Op = "aiot.httpDo"
+	const op operation = "aiot.httpDo"
 
 	body, err := json.Marshal(r.Body)
 	if err != nil {
-		return nil, E(op, err)
+		return nil, makeE(op, err)
 	}
 
 	req, err := http.NewRequest(r.Method, c.makeUrl(r.Path), bytes.NewBuffer(body))
 	if err != nil {
-		return nil, E(op, err)
+		return nil, makeE(op, err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -156,7 +132,7 @@ func (c Client) httpDo(r request) (*http.Response, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, E(op, err)
+		return nil, makeE(op, err)
 	}
 
 	if resp.StatusCode != 200 {
@@ -166,10 +142,10 @@ func (c Client) httpDo(r request) (*http.Response, error) {
 		}
 
 		if err := json.NewDecoder(resp.Body).Decode(&e); err != nil {
-			return nil, E(op, err)
+			return nil, makeE(op, err)
 		}
 
-		return nil, E(op, fmt.Errorf("[code] %s [message] %s", e.ErrorCode, e.ErrorMessage))
+		return nil, makeE(op, fmt.Errorf("[code] %s [message] %s", e.ErrorCode, e.ErrorMessage))
 	}
 
 	return resp, nil
