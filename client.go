@@ -131,9 +131,125 @@ func (c Client) UserProfile(token string) (UserProfile, error) {
 	}, nil
 }
 
-// func (c Client) ListThingsByUser(token string) ([]Thing, int, error) {
-// 	return nil, 0, nil
-// }
+func (c Client) ListThingsByUser(token string, opts *ListThingsByUserOptions) ([]Thing, int, error) {
+	const op operation = "aiot.ListThingsByUser"
+
+	resp, err := c.httpDo(request{
+		Path:   "/api-gw/v1/thing/list",
+		Method: http.MethodGet,
+		Token:  token,
+		Body: map[string]interface{}{
+			"offset": opts.offset,
+			"limit":  opts.limit,
+			"order":  opts.order,
+			"dir":    opts.direction,
+		},
+	})
+
+	if err != nil {
+		return nil, 0, makeE(op, err)
+	}
+
+	var body struct {
+		Total int     `json:"total"`
+		Data  []Thing `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, 0, makeE(op, err)
+	}
+
+	return body.Data, body.Total, nil
+}
+
+func (c Client) CreateThing(token string, in CreateThingInput) error {
+	const op operation = "aiot.CreateThing"
+
+	_, err := c.httpDo(request{
+		Path:   "/api-gw/v1/thing",
+		Method: http.MethodPost,
+		Token:  token,
+		Body: map[string]interface{}{
+			"name":     in.Name,
+			"metadata": in.Metadata,
+		},
+	})
+
+	if err != nil {
+		return makeE(op, err)
+	}
+
+	return nil
+}
+
+func (c Client) DeleteThing(token, thingID string) error {
+	const op operation = "aiot.DeleteThing"
+
+	_, err := c.httpDo(request{
+		Path:   "/api-gw/v1/thing/" + thingID,
+		Method: http.MethodDelete,
+		Token:  token,
+	})
+
+	if err != nil {
+		return makeE(op, err)
+	}
+
+	return nil
+}
+
+func (c Client) ThingProfile(token, thingID string) (Thing, error) {
+	const op operation = "aiot.ThingProfile"
+
+	resp, err := c.httpDo(request{
+		Path:   "/api-gw/v1/thing/" + thingID,
+		Method: http.MethodGet,
+		Token:  token,
+	})
+
+	if err != nil {
+		return Thing{}, makeE(op, err)
+	}
+
+	var body struct {
+		ID       string            `json:"id"`
+		Key      string            `json:"key"`
+		Name     string            `json:"name"`
+		Metadata map[string]string `json:"metadata"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return Thing{}, makeE(op, err)
+	}
+
+	return Thing{
+		ID:       body.ID,
+		Key:      body.Key,
+		Name:     body.Name,
+		Metadata: body.Metadata,
+	}, nil
+}
+
+func (c Client) UpdateThing(token string, in UpdateThingInput) error {
+	const op operation = "aiot.UpdateThing"
+
+	_, err := c.httpDo(request{
+		Path:   "/api-gw/v1/thing",
+		Method: http.MethodPut,
+		Token:  token,
+		Body: map[string]interface{}{
+			"id":       in.ID,
+			"name":     in.Name,
+			"metadata": in.Metadata,
+		},
+	})
+
+	if err != nil {
+		return makeE(op, err)
+	}
+
+	return nil
+}
 
 // // Tạo một gateway mới
 // func (c Client) CreateGateway(token, in CreateGatewayInput) error {

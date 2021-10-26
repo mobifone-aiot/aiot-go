@@ -34,6 +34,17 @@ type CreateGatewayInput struct {
 	ThingID     string
 }
 
+type CreateThingInput struct {
+	Name     string
+	Metadata map[string]string
+}
+
+type UpdateThingInput struct {
+	ID       string
+	Name     string
+	Metadata map[string]string
+}
+
 type request struct {
 	Path   string
 	Method string
