@@ -28,6 +28,13 @@ type Thing struct {
 	Metadata map[string]string
 }
 
+type Channel struct {
+	ID       string
+	Key      string
+	Name     string
+	Metadata map[string]string
+}
+
 type CreateGatewayInput struct {
 	Name        string
 	Description string
@@ -39,7 +46,18 @@ type CreateThingInput struct {
 	Metadata map[string]string
 }
 
+type CreateChannelInput struct {
+	Name     string
+	Metadata map[string]string
+}
+
 type UpdateThingInput struct {
+	ID       string
+	Name     string
+	Metadata map[string]string
+}
+
+type UpdateChannelInput struct {
 	ID       string
 	Name     string
 	Metadata map[string]string

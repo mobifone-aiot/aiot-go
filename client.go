@@ -251,14 +251,153 @@ func (c Client) UpdateThing(token string, in UpdateThingInput) error {
 	return nil
 }
 
-// // Tạo một gateway mới
-// func (c Client) CreateGateway(token, in CreateGatewayInput) error {
-// 	const op operation = "aiot.CreateGateway"
+func (c Client) CreateChannel(token string, in CreateChannelInput) error {
+	const op operation = "aiot.CreateChannel"
 
-// 	return makeE(op, fmt.Errorf("okok"))
-// }
+	_, err := c.httpDo(request{
+		Path:   "/api-gw/v1/channel",
+		Method: http.MethodPost,
+		Token:  token,
+		Body: map[string]interface{}{
+			"name":     in.Name,
+			"metadata": in.Metadata,
+		},
+	})
 
-// // Liệt kê các gateways
-// func (c Client) ListGateways(token string) {
+	if err != nil {
+		return makeE(op, err)
+	}
 
-// }
+	return nil
+}
+
+func (c Client) UpdateChannel(token string, in UpdateChannelInput) error {
+	const op operation = "aiot.UpdateChannel"
+
+	_, err := c.httpDo(request{
+		Path:   "/api-gw/v1/channel",
+		Method: http.MethodPut,
+		Token:  token,
+		Body: map[string]interface{}{
+			"id":       in.ID,
+			"name":     in.Name,
+			"metadata": in.Metadata,
+		},
+	})
+
+	if err != nil {
+		return makeE(op, err)
+	}
+
+	return nil
+}
+
+func (c Client) DeleteChannel(token, channelID string) error {
+	const op operation = "aiot.DeleteChannel"
+
+	_, err := c.httpDo(request{
+		Path:   "/api-gw/v1/channel/" + channelID,
+		Method: http.MethodDelete,
+		Token:  token,
+	})
+
+	if err != nil {
+		return makeE(op, err)
+	}
+
+	return nil
+}
+
+func (c Client) ChannelProfile(token, channelID string) (Channel, error) {
+	const op operation = "aiot.ChannelProfile"
+
+	resp, err := c.httpDo(request{
+		Path:   "/api-gw/v1/channel/" + channelID,
+		Method: http.MethodGet,
+		Token:  token,
+	})
+
+	if err != nil {
+		return Channel{}, makeE(op, err)
+	}
+
+	var body struct {
+		ID       string            `json:"id"`
+		Key      string            `json:"key"`
+		Name     string            `json:"name"`
+		Metadata map[string]string `json:"metadata"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return Channel{}, makeE(op, err)
+	}
+
+	return Channel{
+		ID:       body.ID,
+		Key:      body.Key,
+		Name:     body.Name,
+		Metadata: body.Metadata,
+	}, nil
+}
+
+func (c Client) ListAllChannel(token string, opts *ListAllChannelOptions) ([]Channel, int, error) {
+	const op operation = "aiot.ListAllChannel"
+
+	resp, err := c.httpDo(request{
+		Path:   "/api-gw/v1/thing/getall",
+		Method: http.MethodGet,
+		Token:  token,
+		Body: map[string]interface{}{
+			"offset": opts.offset,
+			"limit":  opts.limit,
+			"order":  opts.order,
+			"dir":    opts.direction,
+		},
+	})
+
+	if err != nil {
+		return nil, 0, makeE(op, err)
+	}
+
+	var body struct {
+		Total int       `json:"total"`
+		Data  []Channel `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, 0, makeE(op, err)
+	}
+
+	return body.Data, body.Total, nil
+}
+
+func (c Client) ListChannelByUser(token string, opts *ListChannelByUserOptions) ([]Channel, int, error) {
+	const op operation = "aiot.ListChannelByUser"
+
+	resp, err := c.httpDo(request{
+		Path:   "/api-gw/v1/channel/list",
+		Method: http.MethodGet,
+		Token:  token,
+		Body: map[string]interface{}{
+			"offset": opts.offset,
+			"limit":  opts.limit,
+			"order":  opts.order,
+			"dir":    opts.direction,
+		},
+	})
+
+	if err != nil {
+		return nil, 0, makeE(op, err)
+	}
+
+	var body struct {
+		Total int       `json:"total"`
+		Data  []Channel `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, 0, makeE(op, err)
+	}
+
+	return body.Data, body.Total, nil
+}

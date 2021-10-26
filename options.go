@@ -47,3 +47,118 @@ func (opts *ListThingsByUserOptions) SetDirection(dir Direction) *ListThingsByUs
 	opts.direction = dir
 	return opts
 }
+
+type ListChannelsByThingOptions struct {
+	offset    int
+	limit     int
+	order     ThingOrder
+	direction Direction
+	connected bool
+}
+
+func NewListChannelsByThingOptions() *ListChannelsByThingOptions {
+	return &ListChannelsByThingOptions{
+		offset:    0,
+		limit:     10,
+		order:     THING_ORDER_NAME,
+		direction: DIRECTION_DESC,
+		connected: true,
+	}
+}
+
+func (opts *ListChannelsByThingOptions) SetOffset(offset int) *ListChannelsByThingOptions {
+	opts.offset = offset
+	return opts
+}
+
+func (opts *ListChannelsByThingOptions) SetLimit(limit int) *ListChannelsByThingOptions {
+	opts.limit = limit
+	return opts
+}
+
+func (opts *ListChannelsByThingOptions) SetOrder(order ThingOrder) *ListChannelsByThingOptions {
+	opts.order = order
+	return opts
+}
+
+func (opts *ListChannelsByThingOptions) SetDirection(dir Direction) *ListChannelsByThingOptions {
+	opts.direction = dir
+	return opts
+}
+
+func (opts *ListChannelsByThingOptions) SetConnected(connected bool) *ListChannelsByThingOptions {
+	opts.connected = connected
+	return opts
+}
+
+type ListAllChannelOptions struct {
+	offset    int
+	limit     int
+	order     ThingOrder
+	direction Direction
+}
+
+func NewListAllChannelOptions() *ListAllChannelOptions {
+	return &ListAllChannelOptions{
+		offset:    0,
+		limit:     10,
+		order:     THING_ORDER_NAME,
+		direction: DIRECTION_DESC,
+	}
+}
+
+func (opts *ListAllChannelOptions) SetOffset(offset int) *ListAllChannelOptions {
+	opts.offset = offset
+	return opts
+}
+
+func (opts *ListAllChannelOptions) SetLimit(limit int) *ListAllChannelOptions {
+	opts.limit = limit
+	return opts
+}
+
+func (opts *ListAllChannelOptions) SetOrder(order ThingOrder) *ListAllChannelOptions {
+	opts.order = order
+	return opts
+}
+
+func (opts *ListAllChannelOptions) SetDirection(dir Direction) *ListAllChannelOptions {
+	opts.direction = dir
+	return opts
+}
+
+type ListChannelByUserOptions struct {
+	offset    int
+	limit     int
+	order     ThingOrder
+	direction Direction
+}
+
+func NewListChannelByUserOptions() *ListChannelByUserOptions {
+	return &ListChannelByUserOptions{
+		offset:    0,
+		limit:     10,
+		order:     THING_ORDER_NAME,
+		direction: DIRECTION_DESC,
+	}
+}
+
+func (opts *ListChannelByUserOptions) SetOffset(offset int) *ListChannelByUserOptions {
+	opts.offset = offset
+	return opts
+}
+
+func (opts *ListChannelByUserOptions) SetLimit(limit int) *ListChannelByUserOptions {
+	opts.limit = limit
+	return opts
+}
+
+func (opts *ListChannelByUserOptions) SetOrder(order ThingOrder) *ListChannelByUserOptions {
+	opts.order = order
+	return opts
+}
+
+func (opts *ListChannelByUserOptions) SetDirection(dir Direction) *ListChannelByUserOptions {
+	opts.direction = dir
+	return opts
+}

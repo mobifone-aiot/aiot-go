@@ -3,6 +3,7 @@ package aiot_test
 import (
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/mobifone-aiot/aiot-go"
 	"github.com/stretchr/testify/require"
 )
@@ -217,4 +218,151 @@ func Test_UpdateThing(t *testing.T) {
 	require.NotEmpty(thing.Metadata)
 
 	client.DeleteThing(token, things[0].ID)
+}
+
+func Test_CreateChannel(t *testing.T) {
+	require := require.New(t)
+
+	client := aiot.NewClient(gatewayAddr)
+	token, _ := client.Token(validEmail, validPassword)
+
+	err := client.CreateChannel(token, aiot.CreateChannelInput{
+		Name: "demo-1",
+		Metadata: map[string]string{
+			"meta-1": "meta-1",
+		},
+	})
+	require.NoError(err)
+
+	opts := aiot.NewListChannelByUserOptions()
+	channels, total, err := client.ListChannelByUser(token, opts)
+	require.NoError(err)
+	require.Equal(1, total)
+	require.NotEmpty(channels)
+	require.Equal("demo-1", channels[0].Name)
+
+	client.DeleteChannel(token, channels[0].ID)
+}
+
+func Test_UpdateChannel(t *testing.T) {
+	require := require.New(t)
+
+	client := aiot.NewClient(gatewayAddr)
+	token, _ := client.Token(validEmail, validPassword)
+
+	err := client.CreateChannel(token, aiot.CreateChannelInput{
+		Name: "demo-1",
+		Metadata: map[string]string{
+			"meta-1": "meta-1",
+		},
+	})
+	require.NoError(err)
+
+	opts := aiot.NewListChannelByUserOptions()
+	channels, _, _ := client.ListChannelByUser(token, opts)
+
+	err = client.UpdateChannel(token, aiot.UpdateChannelInput{
+		ID:   channels[0].ID,
+		Name: "demo-2",
+		Metadata: map[string]string{
+			"meta-2": "meta-2",
+		},
+	})
+	require.NoError(err)
+
+	channels, total, err := client.ListChannelByUser(token, opts)
+	require.NoError(err)
+	require.Equal(1, total)
+	require.NotEmpty(channels)
+	require.Equal("demo-2", channels[0].Name)
+
+	client.DeleteChannel(token, channels[0].ID)
+}
+
+func Test_DeleteChannel(t *testing.T) {
+	require := require.New(t)
+
+	client := aiot.NewClient(gatewayAddr)
+	token, _ := client.Token(validEmail, validPassword)
+
+	err := client.CreateChannel(token, aiot.CreateChannelInput{
+		Name: "demo-1",
+		Metadata: map[string]string{
+			"meta-1": "meta-1",
+		},
+	})
+	require.NoError(err)
+
+	opts := aiot.NewListChannelByUserOptions()
+	channels, total, err := client.ListChannelByUser(token, opts)
+	require.NotEmpty(channels)
+	require.Equal(1, total)
+	require.NoError(err)
+
+	err = client.DeleteChannel(token, channels[0].ID)
+	require.NoError(err)
+
+	channels, total, err = client.ListChannelByUser(token, opts)
+	require.Empty(channels)
+	require.Equal(0, total)
+	require.NoError(err)
+}
+
+func Test_ChannelProfile(t *testing.T) {
+	require := require.New(t)
+
+	client := aiot.NewClient(gatewayAddr)
+	token, _ := client.Token(validEmail, validPassword)
+
+	err := client.CreateChannel(token, aiot.CreateChannelInput{
+		Name: "demo-1",
+		Metadata: map[string]string{
+			"meta-1": "meta-1",
+		},
+	})
+	require.NoError(err)
+
+	opts := aiot.NewListChannelByUserOptions()
+	channels, total, err := client.ListChannelByUser(token, opts)
+	require.NotEmpty(channels)
+	require.Equal(1, total)
+	require.NoError(err)
+
+	channel, err := client.ChannelProfile(token, channels[0].ID)
+	require.NoError(err)
+	require.Equal(channels[0].ID, channel.ID)
+	require.Equal(channels[0].Key, channel.Key)
+	require.Equal(channels[0].Name, channel.Name)
+	require.Equal(channels[0].ID, channel.ID)
+	require.True(cmp.Equal(channels[0].Metadata, channel.Metadata))
+
+	client.DeleteChannel(token, channel.ID)
+}
+
+func Test_ListChannelByUser(t *testing.T) {
+	require := require.New(t)
+
+	client := aiot.NewClient(gatewayAddr)
+	token, _ := client.Token(validEmail, validPassword)
+
+	opts := aiot.NewListChannelByUserOptions()
+	channels, total, err := client.ListChannelByUser(token, opts)
+	require.Empty(channels)
+	require.Equal(0, total)
+	require.NoError(err)
+
+	err = client.CreateChannel(token, aiot.CreateChannelInput{
+		Name: "demo-1",
+		Metadata: map[string]string{
+			"meta-1": "meta-1",
+		},
+	})
+	require.NoError(err)
+
+	channels, total, err = client.ListChannelByUser(token, opts)
+	require.NotEmpty(channels)
+	require.Equal(1, total)
+	require.NoError(err)
+
+	client.DeleteChannel(token, channels[0].ID)
 }
