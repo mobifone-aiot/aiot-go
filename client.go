@@ -251,6 +251,73 @@ func (c Client) UpdateThing(token string, in UpdateThingInput) error {
 	return nil
 }
 
+func (c Client) ListChannelByThing(token, thingID string, opts *ListChannelByThingOptions) ([]Channel, int, error) {
+	const op operation = "client.ListChannelByThing"
+
+	resp, err := c.httpDo(request{
+		Path:   fmt.Sprintf("/api-gw/v1/thing/%s/channels", thingID),
+		Method: http.MethodGet,
+		Token:  token,
+		Body: map[string]interface{}{
+			"offset":       opts.offset,
+			"limit":        opts.limit,
+			"order":        opts.order,
+			"dir":          opts.direction,
+			"disconnected": opts.disconnected,
+		},
+	})
+
+	if err != nil {
+		return nil, 0, makeE(op, err)
+	}
+
+	var body struct {
+		Total int       `json:"total"`
+		Data  []Channel `json:"data"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, 0, makeE(op, err)
+	}
+
+	return body.Data, body.Total, nil
+}
+
+func (c Client) Connect(token string, channelIDs, thingIDs []string) error {
+	const op operation = "client.Connect"
+
+	_, err := c.httpDo(request{
+		Path:   "/api-gw/v1/thing/connect",
+		Method: http.MethodPost,
+		Token:  token,
+		Body: map[string][]string{
+			"channel_ids": channelIDs,
+			"thing_ids":   thingIDs,
+		},
+	})
+
+	if err != nil {
+		return makeE(op, err)
+	}
+
+	return nil
+}
+
+func (c Client) Disconnect(token string, channelID, thingID string) error {
+	const op operation = "client.Disconnect"
+
+	_, err := c.httpDo(request{
+		Path:   fmt.Sprintf("/api-gw/v1/thing/%s/channel/%s", thingID, channelID),
+		Method: http.MethodDelete,
+		Token:  token,
+	})
+
+	if err != nil {
+		return makeE(op, err)
+	}
+	return nil
+}
+
 func (c Client) CreateChannel(token string, in CreateChannelInput) error {
 	const op operation = "aiot.CreateChannel"
 

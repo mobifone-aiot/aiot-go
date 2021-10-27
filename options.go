@@ -48,46 +48,46 @@ func (opts *ListThingsByUserOptions) SetDirection(dir Direction) *ListThingsByUs
 	return opts
 }
 
-type ListChannelsByThingOptions struct {
-	offset    int
-	limit     int
-	order     ThingOrder
-	direction Direction
-	connected bool
+type ListChannelByThingOptions struct {
+	offset       int
+	limit        int
+	order        ThingOrder
+	direction    Direction
+	disconnected bool
 }
 
-func NewListChannelsByThingOptions() *ListChannelsByThingOptions {
-	return &ListChannelsByThingOptions{
-		offset:    0,
-		limit:     10,
-		order:     THING_ORDER_NAME,
-		direction: DIRECTION_DESC,
-		connected: true,
+func NewListChannelByThingOptions() *ListChannelByThingOptions {
+	return &ListChannelByThingOptions{
+		offset:       0,
+		limit:        10,
+		order:        THING_ORDER_NAME,
+		direction:    DIRECTION_DESC,
+		disconnected: true,
 	}
 }
 
-func (opts *ListChannelsByThingOptions) SetOffset(offset int) *ListChannelsByThingOptions {
+func (opts *ListChannelByThingOptions) SetOffset(offset int) *ListChannelByThingOptions {
 	opts.offset = offset
 	return opts
 }
 
-func (opts *ListChannelsByThingOptions) SetLimit(limit int) *ListChannelsByThingOptions {
+func (opts *ListChannelByThingOptions) SetLimit(limit int) *ListChannelByThingOptions {
 	opts.limit = limit
 	return opts
 }
 
-func (opts *ListChannelsByThingOptions) SetOrder(order ThingOrder) *ListChannelsByThingOptions {
+func (opts *ListChannelByThingOptions) SetOrder(order ThingOrder) *ListChannelByThingOptions {
 	opts.order = order
 	return opts
 }
 
-func (opts *ListChannelsByThingOptions) SetDirection(dir Direction) *ListChannelsByThingOptions {
+func (opts *ListChannelByThingOptions) SetDirection(dir Direction) *ListChannelByThingOptions {
 	opts.direction = dir
 	return opts
 }
 
-func (opts *ListChannelsByThingOptions) SetConnected(connected bool) *ListChannelsByThingOptions {
-	opts.connected = connected
+func (opts *ListChannelByThingOptions) SetDisconnected(disconnected bool) *ListChannelByThingOptions {
+	opts.disconnected = disconnected
 	return opts
 }
 
