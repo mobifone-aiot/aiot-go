@@ -119,7 +119,7 @@ func (c Client) UserProfile(token string) (UserProfile, error) {
 
 	return UserProfile{
 		Email:        body.Email,
-		Password:     body.Email,
+		Password:     body.Password,
 		Fullname:     body.Fullname,
 		Phonenumber:  body.Phonenumber,
 		Description:  body.Description,
