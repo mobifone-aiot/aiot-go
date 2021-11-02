@@ -432,6 +432,15 @@ func Test_ListChannelByThing(t *testing.T) {
 	require.NotEmpty(channels)
 	require.Equal(1, total)
 	require.NoError(err)
+
+	channels, total, err = client.ListChannelByThing(
+		token,
+		things[0].ID,
+		aiot.NewListChannelByThingOptions().SetDisconnected(true),
+	)
+	require.Empty(channels)
+	require.Equal(0, total)
+	require.NoError(err)
 }
 
 func Test_Connect(t *testing.T) {
