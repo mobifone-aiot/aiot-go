@@ -582,6 +582,238 @@ func Test_Disconnect(t *testing.T) {
 	require.NoError(err)
 }
 
+func Test_CreateGateway(t *testing.T) {
+	t.Cleanup(cleanup)
+
+	require := require.New(t)
+
+	client := aiot.NewClient(gatewayAddr)
+	token, _ := client.Token(validEmail, validPassword)
+
+	err := client.CreateThing(token, aiot.CreateThingInput{
+		Name: "demo-1",
+		Metadata: map[string]string{
+			"meta-1": "meta-1",
+		},
+	})
+	require.NoError(err)
+
+	things, total, err := client.ListThingsByUser(token, aiot.NewListThingsByUserOptions())
+	require.NotEmpty(things)
+	require.Equal(1, total)
+	require.NoError(err)
+
+	err = client.CreateGateway(token, aiot.CreateGatewayInput{
+		Name:        "demo-1",
+		ThingID:     things[0].ID,
+		Description: "demo-1",
+	})
+	require.NoError(err)
+
+	gateways, err := client.ListGateway(token)
+	require.NoError(err)
+	require.NotEmpty(gateways)
+	require.Equal("demo-1", gateways[0].Name)
+	require.Equal("demo-1", gateways[0].Description)
+	require.Equal(things[0].ID, gateways[0].UnderlayThing.ID)
+	require.Equal("demo-1", gateways[0].UnderlayThing.Name)
+}
+
+func Test_UpdateGateway(t *testing.T) {
+	t.Cleanup(cleanup)
+
+	require := require.New(t)
+
+	client := aiot.NewClient(gatewayAddr)
+	token, _ := client.Token(validEmail, validPassword)
+
+	err := client.CreateThing(token, aiot.CreateThingInput{
+		Name: "demo-1",
+		Metadata: map[string]string{
+			"meta-1": "meta-1",
+		},
+	})
+	require.NoError(err)
+
+	things, total, err := client.ListThingsByUser(token, aiot.NewListThingsByUserOptions())
+	require.NotEmpty(things)
+	require.Equal(1, total)
+	require.NoError(err)
+
+	err = client.CreateGateway(token, aiot.CreateGatewayInput{
+		Name:        "demo-1",
+		ThingID:     things[0].ID,
+		Description: "demo-1",
+	})
+	require.NoError(err)
+
+	gateways, err := client.ListGateway(token)
+	require.NoError(err)
+	require.NotEmpty(gateways)
+
+	err = client.UpdateGateway(token, aiot.UpdateGatewayInput{
+		ID:          gateways[0].ID,
+		Name:        "demo-2",
+		Description: "demo-2",
+	})
+	require.NoError(err)
+
+	gateways, err = client.ListGateway(token)
+	require.NoError(err)
+	require.NotEmpty(gateways)
+	require.Equal("demo-2", gateways[0].Name)
+	require.Equal("demo-2", gateways[0].Description)
+}
+
+func Test_GatewayProfile(t *testing.T) {
+	t.Cleanup(cleanup)
+
+	require := require.New(t)
+
+	client := aiot.NewClient(gatewayAddr)
+	token, _ := client.Token(validEmail, validPassword)
+
+	err := client.CreateThing(token, aiot.CreateThingInput{
+		Name: "demo-1",
+		Metadata: map[string]string{
+			"meta-1": "meta-1",
+		},
+	})
+	require.NoError(err)
+
+	things, total, err := client.ListThingsByUser(token, aiot.NewListThingsByUserOptions())
+	require.NotEmpty(things)
+	require.Equal(1, total)
+	require.NoError(err)
+
+	err = client.CreateGateway(token, aiot.CreateGatewayInput{
+		Name:        "demo-1",
+		ThingID:     things[0].ID,
+		Description: "demo-1",
+	})
+	require.NoError(err)
+
+	gateways, err := client.ListGateway(token)
+	require.NoError(err)
+	require.NotEmpty(gateways)
+
+	gateway, err := client.GatewayProfile(token, gateways[0].ID)
+	require.NoError(err)
+	require.NotEmpty(gateway)
+	require.True(cmp.Equal(gateway, gateways[0]))
+}
+
+func Test_DeleteGateway(t *testing.T) {
+	t.Cleanup(cleanup)
+
+	require := require.New(t)
+
+	client := aiot.NewClient(gatewayAddr)
+	token, _ := client.Token(validEmail, validPassword)
+
+	err := client.CreateThing(token, aiot.CreateThingInput{
+		Name: "demo-1",
+		Metadata: map[string]string{
+			"meta-1": "meta-1",
+		},
+	})
+	require.NoError(err)
+
+	things, total, err := client.ListThingsByUser(token, aiot.NewListThingsByUserOptions())
+	require.NotEmpty(things)
+	require.Equal(1, total)
+	require.NoError(err)
+
+	err = client.CreateGateway(token, aiot.CreateGatewayInput{
+		Name:        "demo-1",
+		ThingID:     things[0].ID,
+		Description: "demo-1",
+	})
+	require.NoError(err)
+
+	gateways, err := client.ListGateway(token)
+	require.NoError(err)
+	require.NotEmpty(gateways)
+
+	err = client.DeleteGateway(token, gateways[0].ID)
+	require.NoError(err)
+
+	gateways, err = client.ListGateway(token)
+	require.NoError(err)
+	require.Empty(gateways)
+}
+
+func Test_GatewayStatus(t *testing.T) {
+	t.Cleanup(cleanup)
+
+	require := require.New(t)
+
+	client := aiot.NewClient(gatewayAddr)
+	token, _ := client.Token(validEmail, validPassword)
+
+	err := client.CreateThing(token, aiot.CreateThingInput{
+		Name: "demo-1",
+		Metadata: map[string]string{
+			"meta-1": "meta-1",
+		},
+	})
+	require.NoError(err)
+
+	things, total, err := client.ListThingsByUser(token, aiot.NewListThingsByUserOptions())
+	require.NotEmpty(things)
+	require.Equal(1, total)
+	require.NoError(err)
+
+	err = client.CreateGateway(token, aiot.CreateGatewayInput{
+		Name:        "demo-1",
+		ThingID:     things[0].ID,
+		Description: "demo-1",
+	})
+	require.NoError(err)
+
+	statuses, err := client.GatewayStatus(token)
+	require.NoError(err)
+	require.NotEmpty(statuses)
+	require.Equal(1, len(statuses))
+}
+
+func Test_GatewayActiveDeviceCount(t *testing.T) {
+	t.Cleanup(cleanup)
+
+	require := require.New(t)
+
+	client := aiot.NewClient(gatewayAddr)
+	token, _ := client.Token(validEmail, validPassword)
+
+	err := client.CreateThing(token, aiot.CreateThingInput{
+		Name: "demo-1",
+		Metadata: map[string]string{
+			"meta-1": "meta-1",
+		},
+	})
+	require.NoError(err)
+
+	things, total, err := client.ListThingsByUser(token, aiot.NewListThingsByUserOptions())
+	require.NotEmpty(things)
+	require.Equal(1, total)
+	require.NoError(err)
+
+	err = client.CreateGateway(token, aiot.CreateGatewayInput{
+		Name:        "demo-1",
+		ThingID:     things[0].ID,
+		Description: "demo-1",
+	})
+	require.NoError(err)
+
+	gateways, err := client.ListGateway(token)
+	require.NoError(err)
+	require.NotEmpty(gateways)
+
+	count, err := client.GatewayActiveDeviceCount(token, gateways[0].ID)
+	require.NoError(err)
+	require.Equal(0, count)
+}
+
 func cleanup() {
 	client := aiot.NewClient(gatewayAddr)
 	token, err := client.Token(validEmail, validPassword)
@@ -599,11 +831,20 @@ func cleanup() {
 		log.Fatalln(err)
 	}
 
+	gateways, err := client.ListGateway(token)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	for _, t := range things {
 		client.DeleteThing(token, t.ID)
 	}
 
 	for _, c := range channels {
 		client.DeleteChannel(token, c.ID)
+	}
+
+	for _, g := range gateways {
+		client.DeleteGateway(token, g.ID)
 	}
 }

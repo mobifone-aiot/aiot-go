@@ -233,3 +233,119 @@ func ExampleClient_Disconnect() {
 
 	fmt.Println("Disconnect thing success")
 }
+
+func ExampleClient_CreateGateway() {
+	// Tạo gateway
+
+	client := aiot.NewClient("http://localhost")
+
+	token, err := client.Token("email@demo.com", "password")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = client.CreateGateway(token, aiot.CreateGatewayInput{
+		Name:        "demo-1",
+		ThingID:     "thing-id-1",
+		Description: "demo-1",
+	})
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println("Create gateway success")
+}
+
+func ExampleClient_UpdateGateway() {
+	// cập nhật thông tin gateway
+
+	client := aiot.NewClient("http://localhost")
+
+	token, err := client.Token("email@demo.com", "password")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = client.UpdateGateway(token, aiot.UpdateGatewayInput{
+		ID:          "gateway-id-1",
+		Name:        "demo-2",
+		Description: "demo-2",
+	})
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println("Update gateway success")
+}
+
+func ExampleClient_GatewayProfile() {
+	// xem thông tin gateway
+
+	client := aiot.NewClient("http://localhost")
+
+	token, err := client.Token("email@demo.com", "password")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	gateway, err := client.GatewayProfile(token, "gateway-id-1")
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Printf("Gateway profile: %v", gateway)
+}
+
+func ExampleClient_DeleteGateway() {
+	// xóa gateway
+
+	client := aiot.NewClient("http://localhost")
+
+	token, err := client.Token("email@demo.com", "password")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	if err := client.DeleteGateway(token, "gateway-id-1"); err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func ExampleClient_GatewayStatus() {
+	// xem thông tin trạng thái gateway
+
+	client := aiot.NewClient("http://localhost")
+
+	token, err := client.Token("email@demo.com", "password")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	status, err := client.GatewayStatus(token)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Printf("gateway status: %v", status)
+}
+
+func ExampleClient_GatewayActiveDeviceCount() {
+	// xem thông tin số lượng thiết bị kết nối vào gateway
+
+	client := aiot.NewClient("http://localhost")
+
+	token, err := client.Token("email@demo.com", "password")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	count, err := client.GatewayActiveDeviceCount(token, "gateway-id-1")
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Printf("Active Device Count: %d", count)
+}

@@ -87,7 +87,7 @@ func (c Client) ResetPassword(token, newPW, oldPW string) error {
 }
 
 // Lấy thông tin profile của người dùng
-func (c Client) UserProfile(token string) (UserProfile, error) {
+func (c Client) UserProfile(token string) (User, error) {
 	const op operation = "aiot.UserProfile"
 
 	resp, err := c.httpDo(request{
@@ -97,7 +97,7 @@ func (c Client) UserProfile(token string) (UserProfile, error) {
 	})
 
 	if err != nil {
-		return UserProfile{}, makeE(op, err)
+		return User{}, makeE(op, err)
 	}
 
 	var body struct {
@@ -114,10 +114,10 @@ func (c Client) UserProfile(token string) (UserProfile, error) {
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
-		return UserProfile{}, makeE(op, err)
+		return User{}, makeE(op, err)
 	}
 
-	return UserProfile{
+	return User{
 		Email:        body.Email,
 		Password:     body.Password,
 		Fullname:     body.Fullname,
@@ -467,4 +467,204 @@ func (c Client) ListChannelByUser(token string, opts *ListChannelByUserOptions) 
 	}
 
 	return body.Data, body.Total, nil
+}
+
+func (c Client) CreateGateway(token string, in CreateGatewayInput) error {
+	const op operation = "aiot.CreateGateway"
+
+	_, err := c.httpDo(request{
+		Path:   "/api-gw/v1/gateway/create",
+		Method: http.MethodPost,
+		Token:  token,
+		Body: map[string]string{
+			"name":        in.Name,
+			"description": in.Description,
+			"thingId":     in.ThingID,
+		},
+	})
+
+	if err != nil {
+		return makeE(op, err)
+	}
+
+	return nil
+}
+
+func (c Client) UpdateGateway(token string, in UpdateGatewayInput) error {
+	const op operation = "aiot.UpdateGateway"
+
+	_, err := c.httpDo(request{
+		Path:   "/api-gw/v1/gateway/edit",
+		Method: http.MethodPut,
+		Token:  token,
+		Body: map[string]string{
+			"id":          in.ID,
+			"name":        in.Name,
+			"description": in.Description,
+		},
+	})
+
+	if err != nil {
+		return makeE(op, err)
+	}
+
+	return nil
+}
+
+func (c Client) DeleteGateway(token, id string) error {
+	const op operation = "aiot.DeleteGateway"
+
+	_, err := c.httpDo(request{
+		Path:   "/api-gw/v1/gateway/" + id,
+		Method: http.MethodDelete,
+		Token:  token,
+	})
+
+	if err != nil {
+		return makeE(op, err)
+	}
+
+	return nil
+}
+
+func (c Client) GatewayProfile(token, id string) (Gateway, error) {
+	const op operation = "aiot.GatewayProfile"
+
+	resp, err := c.httpDo(request{
+		Path:   "/api-gw/v1/gateway/" + id,
+		Method: http.MethodGet,
+		Token:  token,
+	})
+
+	if err != nil {
+		return Gateway{}, makeE(op, err)
+	}
+
+	var body struct {
+		GatewayID          string `json:"gatewayId"`
+		GatewayName        string `json:"gatewayName"`
+		GatewayDescription string `json:"gatewayDes"`
+		GatewayOwner       string `json:"gatewayOwner"`
+		ThingID            string `json:"thingId"`
+		ThingName          string `json:"thingName"`
+		ThingKey           string `json:"thingKey"`
+		ThingOwner         string `json:"thingOwner"`
+		Metadata           string `json:"metadata"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return Gateway{}, makeE(op, err)
+	}
+
+	metadata := make(map[string]string)
+	json.Unmarshal([]byte(body.Metadata), &metadata)
+
+	return Gateway{
+		ID:          body.GatewayID,
+		Name:        body.GatewayName,
+		Description: body.GatewayDescription,
+		Owner:       body.ThingOwner,
+		UnderlayThing: Thing{
+			ID:       body.ThingID,
+			Name:     body.ThingName,
+			Key:      body.ThingKey,
+			Metadata: metadata,
+		},
+	}, nil
+}
+
+func (c Client) ListGateway(token string) ([]Gateway, error) {
+	const op operation = "aiot.ListGateway"
+
+	resp, err := c.httpDo(request{
+		Path:   "/api-gw/v1/gateway/list",
+		Method: http.MethodGet,
+		Token:  token,
+	})
+
+	if err != nil {
+		return nil, makeE(op, err)
+	}
+
+	var body []struct {
+		GatewayID          string `json:"gatewayId"`
+		GatewayName        string `json:"gatewayName"`
+		GatewayDescription string `json:"gatewayDes"`
+		GatewayOwner       string `json:"gatewayOwner"`
+		ThingID            string `json:"thingId"`
+		ThingName          string `json:"thingName"`
+		ThingKey           string `json:"thingKey"`
+		ThingOwner         string `json:"thingOwner"`
+		Metadata           string `json:"metadata"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, makeE(op, err)
+	}
+
+	gateways := []Gateway{}
+	for _, g := range body {
+		metadata := make(map[string]string)
+		json.Unmarshal([]byte(g.Metadata), &metadata)
+
+		gateways = append(gateways, Gateway{
+			ID:          g.GatewayID,
+			Name:        g.GatewayName,
+			Description: g.GatewayDescription,
+			Owner:       g.ThingOwner,
+			UnderlayThing: Thing{
+				ID:       g.ThingID,
+				Name:     g.ThingName,
+				Key:      g.ThingKey,
+				Metadata: metadata,
+			},
+		})
+	}
+
+	return gateways, nil
+}
+
+func (c Client) GatewayStatus(token string) (map[string]bool, error) {
+	const op operation = "aiot.GatewayStatus"
+
+	resp, err := c.httpDo(request{
+		Path:   "/api-gw/v1/gateway/status",
+		Method: http.MethodGet,
+		Token:  token,
+	})
+
+	if err != nil {
+		return nil, makeE(op, err)
+	}
+
+	var body map[string]bool
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return nil, makeE(op, err)
+	}
+
+	return body, nil
+}
+
+func (c Client) GatewayActiveDeviceCount(token, gateID string) (int, error) {
+	const op operation = "aiot.GatewayActiveDeviceCount"
+
+	resp, err := c.httpDo(request{
+		Path:   "/api-gw/v1/gateway/active-device-count/" + gateID,
+		Method: http.MethodGet,
+		Token:  token,
+	})
+
+	if err != nil {
+		return 0, makeE(op, err)
+	}
+
+	var body struct {
+		Count int `json:"count"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return 0, makeE(op, err)
+	}
+
+	return body.Count, nil
 }

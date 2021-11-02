@@ -1,6 +1,6 @@
 package aiot
 
-type UserProfile struct {
+type User struct {
 	Email        string
 	Password     string
 	Fullname     string
@@ -55,6 +55,12 @@ type UpdateThingInput struct {
 	ID       string
 	Name     string
 	Metadata map[string]string
+}
+
+type UpdateGatewayInput struct {
+	ID          string
+	Name        string
+	Description string
 }
 
 type UpdateChannelInput struct {
