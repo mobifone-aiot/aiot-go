@@ -254,6 +254,11 @@ func (c Client) UpdateThing(token string, in UpdateThingInput) error {
 func (c Client) ListChannelByThing(token, thingID string, opts *ListChannelByThingOptions) ([]Channel, int, error) {
 	const op operation = "client.ListChannelByThing"
 
+	disconnected := "false"
+	if opts.disconnected {
+		disconnected = "true"
+	}
+
 	resp, err := c.httpDo(request{
 		Path:   fmt.Sprintf("/api-gw/v1/thing/%s/channels", thingID),
 		Method: http.MethodGet,
@@ -263,7 +268,7 @@ func (c Client) ListChannelByThing(token, thingID string, opts *ListChannelByThi
 			"limit":        opts.limit,
 			"order":        opts.order,
 			"dir":          opts.direction,
-			"disconnected": opts.disconnected,
+			"disconnected": disconnected,
 		},
 	})
 

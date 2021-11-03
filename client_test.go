@@ -1,6 +1,7 @@
 package aiot_test
 
 import (
+	"fmt"
 	"log"
 	"testing"
 
@@ -369,7 +370,7 @@ func Test_ListChannelByUser(t *testing.T) {
 }
 
 func Test_ListChannelByThing(t *testing.T) {
-	t.Cleanup(cleanup)
+	cleanup()
 
 	require := require.New(t)
 
@@ -438,161 +439,105 @@ func Test_ListChannelByThing(t *testing.T) {
 		things[0].ID,
 		aiot.NewListChannelByThingOptions().SetDisconnected(true),
 	)
-	require.Empty(channels)
-	require.Equal(0, total)
 	require.NoError(err)
+	require.NotEmpty(channels)
+	require.Equal(1, total)
 }
 
 func Test_Connect(t *testing.T) {
+	cleanup()
 
 	require := require.New(t)
 
 	client := aiot.NewClient(gatewayAddr)
-	token, _ := client.Token(validEmail, validPassword)
-
-	err := client.CreateThing(token, aiot.CreateThingInput{
-		Name: "demo-1",
-		Metadata: map[string]string{
-			"meta-1": "meta-1",
-		},
-	})
+	token, err := client.Token(validEmail, validPassword)
 	require.NoError(err)
 
-	err = client.CreateChannel(token, aiot.CreateChannelInput{
-		Name: "demo-1",
-		Metadata: map[string]string{
-			"meta-1": "meta-1",
-		},
-	})
+	things1, err := createThings(token, 3)
 	require.NoError(err)
 
-	things, total, err := client.ListThingsByUser(
-		token,
-		aiot.NewListThingsByUserOptions(),
-	)
-	require.NotEmpty(things)
-	require.Equal(1, total)
+	channels1, err := createChannels(token, 3)
 	require.NoError(err)
 
 	channels, total, err := client.ListChannelByThing(
 		token,
-		things[0].ID,
+		things1[0].ID,
 		aiot.NewListChannelByThingOptions(),
 	)
-	require.Empty(channels)
+	require.NoError(err)
 	require.Equal(0, total)
-	require.NoError(err)
+	require.Empty(channels)
 
-	channels, total, err = client.ListChannelByUser(
-		token,
-		aiot.NewListChannelByUserOptions(),
-	)
-	require.NotEmpty(channels)
-	require.Equal(1, total)
-	require.NoError(err)
-
-	err = client.Connect(
-		token,
-		[]string{channels[0].ID},
-		[]string{things[0].ID},
-	)
-	require.NoError(err)
+	for _, ch := range channels1 {
+		err := client.Connect(token, []string{ch.ID}, []string{things1[0].ID})
+		require.NoError(err)
+	}
 
 	channels, total, err = client.ListChannelByThing(
 		token,
-		things[0].ID,
+		things1[0].ID,
 		aiot.NewListChannelByThingOptions(),
 	)
-	require.NotEmpty(channels)
-	require.Equal(1, total)
 	require.NoError(err)
-	t.Cleanup(cleanup)
+	require.Equal(3, total)
+	require.NotEmpty(channels)
 }
 
 func Test_Disconnect(t *testing.T) {
-	t.Cleanup(cleanup)
+	cleanup()
 
 	require := require.New(t)
 
 	client := aiot.NewClient(gatewayAddr)
-	token, _ := client.Token(validEmail, validPassword)
-
-	err := client.CreateThing(token, aiot.CreateThingInput{
-		Name: "demo-1",
-		Metadata: map[string]string{
-			"meta-1": "meta-1",
-		},
-	})
+	token, err := client.Token(validEmail, validPassword)
 	require.NoError(err)
 
-	err = client.CreateChannel(token, aiot.CreateChannelInput{
-		Name: "demo-1",
-		Metadata: map[string]string{
-			"meta-1": "meta-1",
-		},
-	})
+	things1, err := createThings(token, 3)
 	require.NoError(err)
 
-	things, total, err := client.ListThingsByUser(
-		token,
-		aiot.NewListThingsByUserOptions(),
-	)
-	require.NotEmpty(things)
-	require.Equal(1, total)
+	channels1, err := createChannels(token, 3)
 	require.NoError(err)
 
 	channels, total, err := client.ListChannelByThing(
 		token,
-		things[0].ID,
+		things1[0].ID,
 		aiot.NewListChannelByThingOptions(),
 	)
-	require.Empty(channels)
+	require.NoError(err)
 	require.Equal(0, total)
-	require.NoError(err)
+	require.Empty(channels)
 
-	channels, total, err = client.ListChannelByUser(
-		token,
-		aiot.NewListChannelByUserOptions(),
-	)
-	require.NotEmpty(channels)
-	require.Equal(1, total)
-	require.NoError(err)
-
-	err = client.Connect(
-		token,
-		[]string{channels[0].ID},
-		[]string{things[0].ID},
-	)
-	require.NoError(err)
+	for _, ch := range channels1 {
+		err := client.Connect(token, []string{ch.ID}, []string{things1[0].ID})
+		require.NoError(err)
+	}
 
 	channels, total, err = client.ListChannelByThing(
 		token,
-		things[0].ID,
+		things1[0].ID,
 		aiot.NewListChannelByThingOptions(),
 	)
+	require.NoError(err)
+	require.Equal(3, total)
 	require.NotEmpty(channels)
-	require.Equal(1, total)
-	require.NoError(err)
 
-	err = client.Disconnect(
-		token,
-		channels[0].ID,
-		things[0].ID,
-	)
-	require.NoError(err)
+	for _, ch := range channels1 {
+		err := client.Disconnect(token, ch.ID, things1[0].ID)
+		require.NoError(err)
+	}
 
 	channels, total, err = client.ListChannelByThing(
 		token,
-		things[0].ID,
+		things1[0].ID,
 		aiot.NewListChannelByThingOptions(),
 	)
-	require.Empty(channels)
-	require.Equal(0, total)
 	require.NoError(err)
+	require.Equal(0, total)
+	require.Empty(channels)
 }
 
 func Test_CreateGateway(t *testing.T) {
-	t.Cleanup(cleanup)
+	cleanup()
 
 	require := require.New(t)
 
@@ -856,4 +801,52 @@ func cleanup() {
 	for _, g := range gateways {
 		client.DeleteGateway(token, g.ID)
 	}
+}
+
+func createThings(token string, count int) ([]aiot.Thing, error) {
+	client := aiot.NewClient(gatewayAddr)
+
+	for i := 1; i <= count; i++ {
+		err := client.CreateThing(token, aiot.CreateThingInput{
+			Name: fmt.Sprintf("demo-%d", i),
+			Metadata: map[string]string{
+				fmt.Sprintf("meta-%d", i): fmt.Sprintf("meta-%d", i),
+			},
+		})
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	things, _, err := client.ListThingsByUser(token, aiot.NewListThingsByUserOptions())
+	if err != nil {
+		return nil, err
+	}
+
+	return things, nil
+}
+
+func createChannels(token string, count int) ([]aiot.Channel, error) {
+	client := aiot.NewClient(gatewayAddr)
+
+	for i := 1; i <= count; i++ {
+		err := client.CreateChannel(token, aiot.CreateChannelInput{
+			Name: fmt.Sprintf("demo-%d", i),
+			Metadata: map[string]string{
+				fmt.Sprintf("meta-%d", i): fmt.Sprintf("meta-%d", i),
+			},
+		})
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	channels, _, err := client.ListChannelByUser(token, aiot.NewListChannelByUserOptions())
+	if err != nil {
+		return nil, err
+	}
+
+	return channels, nil
 }
