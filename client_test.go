@@ -5,6 +5,7 @@ import (
 	"log"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/google/go-cmp/cmp"
 	"github.com/mobifone-aiot/aiot-go"
 	"github.com/stretchr/testify/require"
@@ -620,7 +621,7 @@ func Test_UpdateGateway(t *testing.T) {
 }
 
 func Test_GatewayProfile(t *testing.T) {
-	t.Cleanup(cleanup)
+	cleanup()
 
 	require := require.New(t)
 
@@ -655,6 +656,8 @@ func Test_GatewayProfile(t *testing.T) {
 	require.NoError(err)
 	require.NotEmpty(gateway)
 	require.True(cmp.Equal(gateway, gateways[0]))
+
+	spew.Dump(gateway)
 }
 
 func Test_DeleteGateway(t *testing.T) {

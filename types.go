@@ -14,11 +14,12 @@ type User struct {
 }
 
 type Gateway struct {
-	ID            string
-	Name          string
-	Description   string
-	Owner         string
-	UnderlayThing Thing
+	ID                 string
+	Name               string
+	Description        string
+	Owner              string
+	UnderlayThing      Thing
+	UnderlayThingOwner string
 }
 
 type Thing struct {

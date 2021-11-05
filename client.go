@@ -568,13 +568,14 @@ func (c Client) GatewayProfile(token, id string) (Gateway, error) {
 		ID:          body.GatewayID,
 		Name:        body.GatewayName,
 		Description: body.GatewayDescription,
-		Owner:       body.ThingOwner,
+		Owner:       body.GatewayOwner,
 		UnderlayThing: Thing{
 			ID:       body.ThingID,
 			Name:     body.ThingName,
 			Key:      body.ThingKey,
 			Metadata: metadata,
 		},
+		UnderlayThingOwner: body.ThingOwner,
 	}, nil
 }
 
@@ -623,6 +624,7 @@ func (c Client) ListGateway(token string) ([]Gateway, error) {
 				Key:      g.ThingKey,
 				Metadata: metadata,
 			},
+			UnderlayThingOwner: g.ThingOwner,
 		})
 	}
 
